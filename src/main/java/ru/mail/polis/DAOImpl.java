@@ -33,6 +33,5 @@ public class DAOImpl implements DAO {
     @Override
     public void close() {
         // TODO: Empty method
-        throw new UnsupportedOperationException("Close - empty method");
     }
 }
