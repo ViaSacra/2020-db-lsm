@@ -34,6 +34,6 @@ public class DAOImpl implements DAO {
 
     @Override
     public void close() {
-        // TODO: Empty method
+        //Empty method
     }
 }
