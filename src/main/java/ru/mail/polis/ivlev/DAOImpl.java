@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-
 import static java.util.Objects.requireNonNull;
 
 public final class DAOImpl implements DAO {
@@ -33,10 +32,10 @@ public final class DAOImpl implements DAO {
     private int generation;
 
     /**
-     * Реализация интерфейса DAO
+     * Реализация интерфейса DAO.
      *
-     * @param file
-     * @param flushThreshold
+     * @param file - директория
+     * @param flushThreshold - максимальный размер таблицы
      */
     public DAOImpl(@NotNull final File file, final long flushThreshold) {
         this.memTable = new MemTable();

@@ -27,13 +27,12 @@ public final class SSTable implements Table {
         this.size = fileSize - count * Integer.BYTES;
     }
 
-
     /**
-     * Метод записи таблицы в файл
+     * Метод записи таблицы в файл.
      *
-     * @param fileTable
-     * @param cellIterator
-     * @throws IOException
+     * @param fileTable - директория
+     * @param cellIterator - итератор
+     * @throws IOException - I/O exception
      */
     public static void write(final File fileTable, final Iterator<Cell> cellIterator) throws IOException {
         try (FileChannel channel = new FileOutputStream(fileTable).getChannel()) {

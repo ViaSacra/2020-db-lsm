@@ -9,7 +9,7 @@ public final class Time {
     }
 
     /**
-     * Метод, возвращающий текущее время в nano seconds
+     * Метод, возвращающий текущее время в nano seconds.
      *
      * @return prevTime
      */
