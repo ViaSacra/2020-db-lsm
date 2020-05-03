@@ -12,7 +12,13 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+
 
 import static java.util.Objects.requireNonNull;
 
@@ -26,6 +32,12 @@ public final class DAOImpl implements DAO {
     private MemTable memTable;
     private int generation;
 
+    /**
+     * Реализация интерфейса DAO
+     *
+     * @param file
+     * @param flushThreshold
+     */
     public DAOImpl(@NotNull final File file, final long flushThreshold) {
         this.memTable = new MemTable();
         this.flushThreshold = flushThreshold;
@@ -98,10 +110,10 @@ public final class DAOImpl implements DAO {
     }
 
     private void flush() throws IOException {
-        final File file = new File(this.file, generation + TEMP);
-        SSTable.write(file, memTable.iterator(ByteBuffer.allocate(0)));
+        final File copyFile = new File(this.file, generation + TEMP);
+        SSTable.write(copyFile, memTable.iterator(ByteBuffer.allocate(0)));
         final File dest = new File(this.file, generation + SUFFIX);
-        Files.move(file.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        Files.move(copyFile.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
         ssTables.put(generation, new SSTable(dest));
         generation++;
         memTable = new MemTable();

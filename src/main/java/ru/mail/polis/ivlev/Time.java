@@ -3,17 +3,22 @@ package ru.mail.polis.ivlev;
 public final class Time {
 
     private static int count;
-    private static long time;
+    private static long prevTime;
 
     private Time() {
     }
 
+    /**
+     * Метод, возвращающий текущее время в nano seconds
+     *
+     * @return prevTime
+     */
     public static long getCurrentTime() {
         final long currentTimeMillis = System.currentTimeMillis();
-        if (time != currentTimeMillis) {
-            time = currentTimeMillis;
+        if (prevTime != currentTimeMillis) {
+            prevTime = currentTimeMillis;
             count = 0;
         }
-        return time * 1_000_000 + count++;
+        return prevTime * 1_000_000 + count++;
     }
 }

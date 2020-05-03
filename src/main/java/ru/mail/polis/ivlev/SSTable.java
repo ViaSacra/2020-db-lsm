@@ -27,6 +27,14 @@ public final class SSTable implements Table {
         this.size = fileSize - count * Integer.BYTES;
     }
 
+
+    /**
+     * Метод записи таблицы в файл
+     *
+     * @param fileTable
+     * @param cellIterator
+     * @throws IOException
+     */
     public static void write(final File fileTable, final Iterator<Cell> cellIterator) throws IOException {
         try (FileChannel channel = new FileOutputStream(fileTable).getChannel()) {
             final List<Integer> offsets = new ArrayList<>();
@@ -130,7 +138,7 @@ public final class SSTable implements Table {
         while (left <= right) {
             final int middle = left + (right - left) / 2;
             try {
-                int cmp = getKey(middle).compareTo(key);
+                final int cmp = getKey(middle).compareTo(key);
                 if (cmp < 0) {
                     left = middle + 1;
                 } else if (cmp > 0) {
@@ -166,12 +174,12 @@ public final class SSTable implements Table {
 
     @Override
     public void upsert(@NotNull final ByteBuffer key, @NotNull final ByteBuffer value) {
-        //Empty method
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void remove(@NotNull final ByteBuffer key) {
-        //Empty method
+        throw new UnsupportedOperationException();
     }
 
     @Override

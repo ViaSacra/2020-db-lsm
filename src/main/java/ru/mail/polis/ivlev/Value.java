@@ -22,13 +22,19 @@ public final class Value implements Comparable<Value> {
     }
 
     public static Value of(final ByteBuffer data) {
-        return new Value(Time.getCurrentTime(), data.duplicate());
+        return new Value(getCurrentTime(), data.duplicate());
     }
 
     public static Value tombstone() {
         return new Value(getCurrentTime(), null);
     }
 
+    /**
+     * Метод, возвращабщий read only data.
+     * Если data == null, то IllegalArgumentException
+     *
+     * @return read only data
+     */
     @NotNull
     public ByteBuffer getData() {
         if (data == null) {
