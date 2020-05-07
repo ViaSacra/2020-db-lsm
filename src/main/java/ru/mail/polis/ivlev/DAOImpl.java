@@ -41,7 +41,7 @@ public final class DAOImpl implements DAO {
         this.memTable = new MemTable();
         this.flushThreshold = flushThreshold;
         this.file = file;
-        generation = -1;
+        this.generation = -1;
         final File[] list = file.listFiles((dir1, name) -> name.endsWith(SUFFIX));
         assert list != null;
         Arrays.stream(list)

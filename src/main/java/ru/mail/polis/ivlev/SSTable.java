@@ -19,7 +19,7 @@ public final class SSTable implements Table {
     private final int size;
 
     SSTable(@NotNull final File file) throws IOException {
-        fileChannel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
+        this.fileChannel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
         final int fileSize = (int) fileChannel.size() - Integer.BYTES;
         final ByteBuffer cellCount = ByteBuffer.allocate(Integer.BYTES);
         fileChannel.read(cellCount, fileSize);
