@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,14 +28,14 @@ public final class DAOImpl implements DAO {
     private static final String TEMP = "SSTable.tmp";
     private final long flushThreshold;
     private final File file;
-    private final NavigableMap<Integer, Table> ssTables = new TreeMap<>();
+    private NavigableMap<Integer, Table> ssTables = new TreeMap<>();
     private MemTable memTable;
     private int generation;
 
     /**
      * Реализация интерфейса DAO.
      *
-     * @param file - директория
+     * @param file           - директория
      * @param flushThreshold - максимальный размер таблицы
      */
     public DAOImpl(@NotNull final File file, final long flushThreshold) {
@@ -66,20 +67,8 @@ public final class DAOImpl implements DAO {
     @NotNull
     @Override
     public Iterator<Record> iterator(@NotNull final ByteBuffer from) throws IOException {
-        final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
-        iteratorList.add(memTable.iterator(from));
-        ssTables.descendingMap().values().forEach(table -> {
-            try {
-                iteratorList.add(table.iterator(from));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-        final Iterator<Cell> cells = Iters.collapseEquals(
-                Iterators.mergeSorted(iteratorList, Cell.COMPARATOR),
-                Cell::getKey);
-        final Iterator<Cell> alive = Iterators.filter(cells,
-                cell -> !cell.getValue().isRemoved());
+        final Iterator<Cell> alive = Iterators.filter(compactIterator(from),
+                cell -> !requireNonNull(cell).getValue().isRemoved());
         return Iterators.transform(alive, cell ->
                 Record.of(requireNonNull(cell).getKey(), cell.getValue().getData()));
     }
@@ -108,13 +97,45 @@ public final class DAOImpl implements DAO {
         ssTables.values().forEach(Table::close);
     }
 
+    @Override
+    public void compact() throws IOException {
+        final File copyFile = new File(this.file, generation + TEMP);
+        SSTable.write(copyFile, compactIterator(Value.EMPTY_BUFFER));
+        for (int i = 0; i < generation; i++) {
+            Files.delete(new File(this.file, i + SUFFIX).toPath());
+        }
+        generation = 0;
+        final File dest = new File(this.file, generation + SUFFIX);
+        Files.move(copyFile.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        ssTables.clear();
+        ssTables.put(generation, new SSTable(dest));
+        memTable = new MemTable();
+        generation++;
+    }
+
     private void flush() throws IOException {
         final File copyFile = new File(this.file, generation + TEMP);
-        SSTable.write(copyFile, memTable.iterator(ByteBuffer.allocate(0)));
+        SSTable.write(copyFile, memTable.iterator(Value.EMPTY_BUFFER);
         final File dest = new File(this.file, generation + SUFFIX);
         Files.move(copyFile.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
         ssTables.put(generation, new SSTable(dest));
         generation++;
         memTable = new MemTable();
+    }
+
+    @NotNull
+    private Iterator<Cell> compactIterator(@NotNull final ByteBuffer from) throws IOException {
+        final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
+        iteratorList.add(memTable.iterator(from));
+        ssTables.descendingMap().values().forEach(table -> {
+            try {
+                iteratorList.add(table.iterator(from));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+        return Iters.collapseEquals(
+                Iterators.mergeSorted(iteratorList, Cell.COMPARATOR),
+                Cell::getKey);
     }
 }

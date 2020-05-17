@@ -8,6 +8,7 @@ import static ru.mail.polis.ivlev.Time.getCurrentTime;
 
 public final class Value implements Comparable<Value> {
 
+    public static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
     private final long timestamp;
     private final ByteBuffer data;
 
