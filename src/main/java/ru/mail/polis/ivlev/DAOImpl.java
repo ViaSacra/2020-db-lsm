@@ -115,7 +115,7 @@ public final class DAOImpl implements DAO {
 
     private void flush() throws IOException {
         final File copyFile = new File(this.file, generation + TEMP);
-        SSTable.write(copyFile, memTable.iterator(Value.EMPTY_BUFFER);
+        SSTable.write(copyFile, memTable.iterator(Value.EMPTY_BUFFER));
         final File dest = new File(this.file, generation + SUFFIX);
         Files.move(copyFile.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
         ssTables.put(generation, new SSTable(dest));
