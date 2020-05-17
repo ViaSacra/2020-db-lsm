@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +27,7 @@ public final class DAOImpl implements DAO {
     private static final String TEMP = "SSTable.tmp";
     private final long flushThreshold;
     private final File file;
-    private NavigableMap<Integer, Table> ssTables = new TreeMap<>();
+    private final NavigableMap<Integer, Table> ssTables = new TreeMap<>();
     private MemTable memTable;
     private int generation;
 
