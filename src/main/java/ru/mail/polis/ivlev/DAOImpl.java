@@ -103,10 +103,9 @@ public final class DAOImpl implements DAO {
         for (int i = 0; i < generation; i++) {
             Files.delete(new File(this.file, i + SUFFIX).toPath());
         }
+        generation = 0;
         final File dest = new File(this.file, generation + SUFFIX);
         Files.move(copyFile.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
-        ssTables.clear();
-        generation = 0;
         ssTables.put(generation, new SSTable(dest));
         generation++;
         memTable = new MemTable();
