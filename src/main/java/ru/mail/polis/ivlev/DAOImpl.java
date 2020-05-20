@@ -124,6 +124,7 @@ public final class DAOImpl implements DAO {
     @NotNull
     private Iterator<Cell> compactIterator(@NotNull final ByteBuffer from) throws IOException {
         final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
+        iteratorList.add(memTable.iterator(from));
         ssTables.descendingMap().values().forEach(table -> {
             try {
                 iteratorList.add(table.iterator(from));
