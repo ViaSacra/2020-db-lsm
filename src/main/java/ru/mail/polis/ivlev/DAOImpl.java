@@ -132,7 +132,7 @@ public final class DAOImpl implements DAO {
     }
 
     private List<Iterator<Cell>> getIteratorList(@NotNull final ByteBuffer from) {
-        final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
+        final List<Iterator<Cell>> iteratorList = new ArrayList<>();
         ssTables.descendingMap().values().forEach(table -> {
             try {
                 iteratorList.add(table.iterator(from));
