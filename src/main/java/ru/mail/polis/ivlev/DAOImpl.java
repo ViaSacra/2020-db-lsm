@@ -74,18 +74,18 @@ public final class DAOImpl implements DAO {
 
     @Override
     public void upsert(@NotNull final ByteBuffer key, @NotNull final ByteBuffer value) throws IOException {
+        memTable.upsert(key, value);
         if (memTable.size() >= flushThreshold) {
             flush();
         }
-        memTable.upsert(key, value);
     }
 
     @Override
     public void remove(@NotNull final ByteBuffer key) throws IOException {
+        memTable.remove(key);
         if (memTable.size() >= flushThreshold) {
             flush();
         }
-        memTable.remove(key);
     }
 
     @Override
@@ -124,7 +124,6 @@ public final class DAOImpl implements DAO {
     @NotNull
     private Iterator<Cell> compactIterator(@NotNull final ByteBuffer from) throws IOException {
         final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
-        iteratorList.add(memTable.iterator(from));
         ssTables.descendingMap().values().forEach(table -> {
             try {
                 iteratorList.add(table.iterator(from));
