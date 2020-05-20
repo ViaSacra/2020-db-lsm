@@ -66,7 +66,9 @@ public final class DAOImpl implements DAO {
     @NotNull
     @Override
     public Iterator<Record> iterator(@NotNull final ByteBuffer from) throws IOException {
-        final Iterator<Cell> alive = Iterators.filter(compactIterator(from),
+        final List<Iterator<Cell>> iteratorList = getIteratorList(from);
+        iteratorList.add(memTable.iterator(from));
+        final Iterator<Cell> alive = Iterators.filter(compactIterator(iteratorList),
                 cell -> !requireNonNull(cell).getValue().isRemoved());
         return Iterators.transform(alive, cell ->
                 Record.of(requireNonNull(cell).getKey(), cell.getValue().getData()));
@@ -99,7 +101,8 @@ public final class DAOImpl implements DAO {
     @Override
     public void compact() throws IOException {
         final File copyFile = new File(this.file, generation + TEMP);
-        SSTable.write(copyFile, compactIterator(Value.EMPTY_BUFFER));
+        final List<Iterator<Cell>> iteratorList = getIteratorList(Value.EMPTY_BUFFER);
+        SSTable.write(copyFile, compactIterator(iteratorList));
         for (int i = 0; i < generation; i++) {
             Files.delete(new File(this.file, i + SUFFIX).toPath());
         }
@@ -122,9 +125,14 @@ public final class DAOImpl implements DAO {
     }
 
     @NotNull
-    private Iterator<Cell> compactIterator(@NotNull final ByteBuffer from) throws IOException {
+    private Iterator<Cell> compactIterator(@NotNull final List<Iterator<Cell>> iteratorList) {
+        return Iters.collapseEquals(
+                Iterators.mergeSorted(iteratorList, Cell.COMPARATOR),
+                Cell::getKey);
+    }
+
+    private List<Iterator<Cell>> getIteratorList (@NotNull final ByteBuffer from) {
         final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
-        iteratorList.add(memTable.iterator(from));
         ssTables.descendingMap().values().forEach(table -> {
             try {
                 iteratorList.add(table.iterator(from));
@@ -132,8 +140,6 @@ public final class DAOImpl implements DAO {
                 throw new UncheckedIOException(e);
             }
         });
-        return Iters.collapseEquals(
-                Iterators.mergeSorted(iteratorList, Cell.COMPARATOR),
-                Cell::getKey);
+        return iteratorList;
     }
 }
