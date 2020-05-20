@@ -67,7 +67,6 @@ public final class DAOImpl implements DAO {
     @Override
     public Iterator<Record> iterator(@NotNull final ByteBuffer from) throws IOException {
         final List<Iterator<Cell>> iteratorList = getIteratorList(from);
-        iteratorList.add(memTable.iterator(from));
         final Iterator<Cell> alive = Iterators.filter(compactIterator(iteratorList),
                 cell -> !requireNonNull(cell).getValue().isRemoved());
         return Iterators.transform(alive, cell ->
@@ -131,7 +130,7 @@ public final class DAOImpl implements DAO {
                 Cell::getKey);
     }
 
-    private List<Iterator<Cell>> getIteratorList(@NotNull final ByteBuffer from) {
+    private List<Iterator<Cell>> getIteratorList(@NotNull final ByteBuffer from) throws IOException {
         final List<Iterator<Cell>> iteratorList = new ArrayList<>();
         ssTables.descendingMap().values().forEach(table -> {
             try {
@@ -140,6 +139,7 @@ public final class DAOImpl implements DAO {
                 throw new UncheckedIOException(e);
             }
         });
+        iteratorList.add(memTable.iterator(from));
         return iteratorList;
     }
 }
