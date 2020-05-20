@@ -131,7 +131,7 @@ public final class DAOImpl implements DAO {
                 Cell::getKey);
     }
 
-    private List<Iterator<Cell>> getIteratorList (@NotNull final ByteBuffer from) {
+    private List<Iterator<Cell>> getIteratorList(@NotNull final ByteBuffer from) {
         final List<Iterator<Cell>> iteratorList = new ArrayList<>(ssTables.size() + 1);
         ssTables.descendingMap().values().forEach(table -> {
             try {
